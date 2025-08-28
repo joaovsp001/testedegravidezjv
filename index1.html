@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Instituto Nacional de Saúde – Experimental</title>
+  <style>
+    :root {
+      --azul: #154273;
+      --azul-escuro: #0d2b4f;
+      --cinza-bg: #f5f5f5;
+      --verde: #198754;
+      --vermelho: #b71c1c;
+      --borda: #dcdcdc;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: var(--cinza-bg);
+      color: #222;
+    }
+
+    header {
+      background: var(--azul);
+      color: #fff;
+      padding: 18px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border-bottom: 4px solid var(--azul-escuro);
+    }
+    header img {
+      width: 40px;
+      height: 40px;
+    }
+    header h1 {
+      font-size: 1.2rem;
+      margin: 0;
+    }
+
+    .progress-bar {
+      height: 6px;
+      background: #ddd;
+      width: 100%;
+    }
+    .progress {
+      height: 100%;
+      width: 0%;
+      background: var(--azul);
+      transition: width 0.8s ease;
+    }
+
+    .section {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .card {
+      background: #fff;
+      border: 1px solid var(--borda);
+      border-radius: 8px;
+      padding: 24px;
+      width: 100%;
+      max-width: 600px;
+      text-align: center;
+    }
+
+    h2 {
+      margin-top: 0;
+      color: var(--azul-escuro);
+    }
+
+    input, select {
+      width: 100%;
+      padding: 10px;
+      margin: 6px 0;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    label {
+      display: block;
+      text-align: left;
+      margin-top: 10px;
+      font-size: 0.95rem;
+    }
+
+    .btn {
+      margin-top: 16px;
+      padding: 12px 20px;
+      background: var(--azul);
+      border: none;
+      border-radius: 6px;
+      color: #fff;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .btn:hover {
+      background: var(--azul-escuro);
+    }
+    .btn-success {
+      background: var(--verde);
+    }
+    .btn-success:hover {
+      background: #146c43;
+    }
+
+    .spinner {
+      border: 6px solid #eee;
+      border-top: 6px solid var(--azul);
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      margin: 20px auto;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    img.result-img {
+      width: 200px;
+      margin-top: 16px;
+      border-radius: 6px;
+    }
+
+    footer {
+      background: var(--azul-escuro);
+      color: #eee;
+      text-align: center;
+      padding: 20px;
+    }
+    footer a {
+      color: #fff;
+      margin: 0 10px;
+      text-decoration: none;
+      font-size: 0.9rem;
+    }
+    footer a:hover {
+      text-decoration: underline;
+    }
+
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+  <header>
+    <img src="brasao.png" alt="Brasão genérico">
+    <h1>Instituto Nacional de Saúde – Experimental</h1>
+  </header>
+
+  <div class="progress-bar">
+    <div class="progress" id="progress"></div>
+  </div>
+
+  <!-- Formulário inicial -->
+  <section class="section" id="sec-form">
+    <div class="card">
+      <h2>Inicie seu teste</h2>
+      <label>Nome completo</label>
+      <input type="text" id="nome" placeholder="Digite seu nome">
+      <label>Idade</label>
+      <input type="number" id="idade" placeholder="Digite sua idade">
+      <label>Cidade</label>
+      <input type="text" id="cidade" placeholder="Digite sua cidade">
+      <label>Sexo</label>
+      <select id="sexo">
+        <option value="">Selecione</option>
+        <option>Feminino</option>
+        <option>Masculino</option>
+        <option>Outro</option>
+      </select>
+      <label>
+        <input type="checkbox" id="consent"> Autorizo o processamento dos meus dados para análise
+      </label>
+      <button class="btn" onclick="startTest()">Enviar e iniciar teste</button>
+    </div>
+  </section>
+
+  <!-- Carregando -->
+  <section class="section hidden" id="sec-loading">
+    <div class="card">
+      <h2 id="loadingStep">1/3 — Leitura da amostra</h2>
+      <div class="spinner"></div>
+      <p>Aguarde, estamos processando os dados...</p>
+    </div>
+  </section>
+
+  <!-- Resultado -->
+  <section class="section hidden" id="sec-result">
+    <div class="card">
+      <h2 style="color: var(--verde);">✅ Resultado: POSITIVO</h2>
+      <p>Parabéns, seu teste deu positivo.</p>
+      <p id="protocolo"></p>
+      <button class="btn" onclick="discoverFather()">Prosseguir para identificação do pai</button>
+    </div>
+  </section>
+
+  <!-- Carregando Pai -->
+  <section class="section hidden" id="sec-father">
+    <div class="card">
+      <h2 id="loadingFather">Procurando o pai...</h2>
+      <div class="spinner"></div>
+      <p>Consultando banco nacional de DNA...</p>
+    </div>
+  </section>
+
+  <!-- Pai Encontrado -->
+  <section class="section hidden" id="sec-final">
+    <div class="card">
+      <h2> Resultado encontrado</h2>
+      <img class="result-img" src="dedos.png" alt="dedos">
+      <p>Identificamos o pai: seus dedos</p>
+      <p id="protocolo-final"></p>
+    </div>
+  </section>
+
+  <!-- Pagamento de Taxa (inicialmente escondido) -->
+  <section class="section hidden" id="sec-tax">
+    <div class="card" style="border-left:6px solid var(--azul);">
+      <h2>💳 Pague seus impostos por uso</h2>
+      <p>Conforme regulamentação experimental vigente, este serviço requer o envio de comprovante via WhatsApp.</p>
+      <p><strong>Atenção:</strong> no momento, aceitamos apenas <u>fotos (de preferencia nude) enviadas por WhatsApp</u> como forma de pagamento.</p>
+      <a class="btn btn-success" href="https://wa.me/5541992545450" target="_blank">Enviar Comprovante pelo WhatsApp</a>
+    </div>
+  </section>
+
+  <footer>
+    <a href="#">Política de Privacidade</a>
+    <a href="#">Central de Ajuda</a>
+    <a href="#">Agência Nacional de Saúde Experimental</a>
+    <p style="margin-top:10px;font-size:0.8rem;">© 2025 – Instituto Nacional de Saúde – Experimental</p>
+  </footer>
+
+  <script>
+    function updateProgress(p) {
+      document.getElementById("progress").style.width = p + "%";
+    }
+
+    function generateProtocol() {
+      const rand = Math.random().toString(36).substring(2, 8).toUpperCase();
+      const date = new Date().toISOString().split("T")[0];
+      return `Protocolo: ${date}-${rand}`;
+    }
+
+    function startTest() {
+      if (!document.getElementById("consent").checked) {
+        alert("Você precisa autorizar o processamento dos dados.");
+        return;
+      }
+      document.getElementById("sec-form").classList.add("hidden");
+      document.getElementById("sec-loading").classList.remove("hidden");
+      updateProgress(25);
+
+      let steps = [
+        "1/3 — Leitura da amostra",
+        "2/3 — Análise hormonal",
+        "3/3 — Verificação cruzada"
+      ];
+      let i = 0;
+      let loadingStep = document.getElementById("loadingStep");
+      let interval = setInterval(() => {
+        loadingStep.textContent = steps[i];
+        i++;
+        updateProgress(25 + i * 20);
+        if (i === steps.length) {
+          clearInterval(interval);
+          setTimeout(() => {
+            document.getElementById("sec-loading").classList.add("hidden");
+            document.getElementById("sec-result").classList.remove("hidden");
+            updateProgress(80);
+            document.getElementById("protocolo").textContent = generateProtocol();
+          }, 1500);
+        }
+      }, 2000);
+    }
+
+    function discoverFather() {
+      document.getElementById("sec-result").classList.add("hidden");
+      document.getElementById("sec-father").classList.remove("hidden");
+      updateProgress(90);
+
+      let frases = [
+        "Procurando o pai...",
+        "Analisando DNA...",
+        "Consultando base nacional...",
+        "Finalizando análise..."
+      ];
+      let i = 0;
+      let loadingFather = document.getElementById("loadingFather");
+      let interval = setInterval(() => {
+        loadingFather.textContent = frases[i % frases.length];
+        i++;
+      }, 1500);
+
+      setTimeout(() => {
+        clearInterval(interval);
+        document.getElementById("sec-father").classList.add("hidden");
+        document.getElementById("sec-final").classList.remove("hidden");
+        updateProgress(100);
+        document.getElementById("protocolo-final").textContent = generateProtocol();
+
+        // Mostra a seção de pagamento de taxa somente agora
+        document.getElementById("sec-tax").classList.remove("hidden");
+      }, 6000);
+    }
+  </script>
+</body>
+</html>
